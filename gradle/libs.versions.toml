@@ -1,0 +1,22 @@
+[versions]
+selenide = "7.19.1"
+junit = "5.14.4"
+allure = "2.35.5"
+allurePlugin = "4.3.0"
+aspectj = "1.9.27"
+assertj = "3.27.7"
+imageComparison = "4.4.0"
+slf4j = "2.0.20"
+
+[libraries]
+selenide = { module = "com.codeborne:selenide", version.ref = "selenide" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+allure-selenide = { module = "io.qameta.allure:allure-selenide", version.ref = "allure" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+image-comparison = { module = "com.github.romankh3:image-comparison", version.ref = "imageComparison" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+
+[plugins]
+allure = { id = "io.qameta.allure", version.ref = "allurePlugin" }

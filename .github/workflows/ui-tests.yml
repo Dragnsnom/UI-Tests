@@ -1,0 +1,78 @@
+name: UI tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: "Браузер"
+        type: choice
+        options: [chrome, firefox, edge]
+        default: chrome
+      mode:
+        description: "Режим"
+        type: choice
+        options: [desktop, mobile]
+        default: desktop
+      tags:
+        description: "Теги JUnit через запятую (пусто = все)"
+        required: false
+        default: ""
+  pull_request:
+
+concurrency:
+  group: ui-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BROWSER: ${{ inputs.browser || 'chrome' }}
+      MODE: ${{ inputs.mode || 'desktop' }}
+      TAGS: ${{ inputs.tags || '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Браузер в обычном (не headless) режиме на виртуальном дисплее: headless Маркет чаще блокирует
+      - name: Run tests
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            ./gradlew test \
+              -Pbrowser="$BROWSER" -Pmode="$MODE" -Ptags="$TAGS" \
+              -Pheadless=false -PignoreFailures=true --continue
+
+      - name: Build Allure report
+        if: always()
+        run: ./gradlew allureReport
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report-${{ env.BROWSER }}-${{ env.MODE }}
+          path: build/reports/allure-report
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-${{ env.BROWSER }}-${{ env.MODE }}
+          path: |
+            build/screenshots
+            build/reports/selenide
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Fail on test failures
+        if: always()
+        run: |
+          if grep -rqs -E '<(failure|error)' build/test-results/test/*.xml; then
+            echo "Есть упавшие тесты — смотрите Allure-отчёт в артефактах"; exit 1
+          fi

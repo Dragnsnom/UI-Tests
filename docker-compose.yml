@@ -1,0 +1,69 @@
+# Удалённый запуск браузеров.
+#
+# Selenoid (amd64; образы браузеров нужно скачать заранее, см. README):
+#   docker compose up -d
+#   ./gradlew test -Premote=http://localhost:4444/wd/hub
+#   UI с VNC: http://localhost:8080
+#
+# Selenium Grid со свежим Chromium (работает и на Apple Silicon):
+#   docker compose --profile grid up -d
+#   ./gradlew test -Premote=http://localhost:4445/wd/hub
+
+services:
+  selenoid:
+    image: aerokube/selenoid:1.11.3
+    container_name: selenoid
+    restart: unless-stopped
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./selenoid:/etc/selenoid:ro
+      - ./build/selenoid/video:/opt/selenoid/video
+      - ./build/selenoid/logs:/opt/selenoid/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=${PWD}/build/selenoid/video
+    command:
+      - -conf
+      - /etc/selenoid/browsers.json
+      - -video-output-dir
+      - /opt/selenoid/video
+      - -log-output-dir
+      - /opt/selenoid/logs
+      - -container-network
+      - selenoid
+      - -limit
+      - "4"
+      - -timeout
+      - 3m
+    networks:
+      - selenoid
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui:1.10.11
+    container_name: selenoid-ui
+    restart: unless-stopped
+    depends_on:
+      - selenoid
+    ports:
+      - "8080:8080"
+    command: ["--selenoid-uri", "http://selenoid:4444"]
+    networks:
+      - selenoid
+
+  chromium-grid:
+    profiles: ["grid"]
+    image: selenium/standalone-chromium:156.0
+    container_name: chromium-grid
+    shm_size: 2gb
+    ports:
+      - "4445:4444"
+      - "7900:7900" # noVNC, пароль: secret
+    environment:
+      - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - TZ=Europe/Moscow
+
+networks:
+  selenoid:
+    name: selenoid
