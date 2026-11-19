@@ -6,6 +6,7 @@ import io.qameta.allure.selenide.AllureSelenide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.market.config.TestConfig;
+import ru.yandex.market.extensions.HumanPacingListener;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,6 +48,9 @@ public final class DriverConfigurator {
                 .screenshots(true)
                 .savePageSource(true)
                 .includeSelenideSteps(true));
+        if (cfg.humanize()) {
+            SelenideLogger.addListener("HumanPacing", new HumanPacingListener());
+        }
         writeAllureEnvironment(cfg);
         configured = true;
     }

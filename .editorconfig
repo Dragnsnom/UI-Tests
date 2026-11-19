@@ -1,0 +1,10 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# IntelliJ по умолчанию открывает .properties в ISO-8859-1 — из-за этого кириллица в комментариях выглядит кракозябрами
+[*.properties]
+charset = utf-8

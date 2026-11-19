@@ -33,6 +33,14 @@ final class CapabilitiesFactory {
     private static MutableCapabilities chromium(ChromiumOptions<?> options, TestConfig cfg) {
         options.addArguments("--lang=ru-RU", "--disable-notifications", "--disable-search-engine-choice-screen");
         options.setExperimentalOption("prefs", Map.of("intl.accept_languages", "ru-RU,ru"));
+        if (cfg.stealth()) {
+            // Без этого Chrome выставляет navigator.webdriver=true и плашку «управляется автоматизированным ПО» —
+            // SmartCaptcha Яндекса реагирует на это в первую очередь
+            options.setExperimentalOption("excludeSwitches", List.of("enable-automation"));
+            options.setExperimentalOption("useAutomationExtension", false);
+            options.addArguments("--disable-blink-features=AutomationControlled");
+        }
+        cfg.userDataDir().ifPresent(dir -> options.addArguments("--user-data-dir=" + dir));
         options.addArguments(cfg.browserArgs());
         if (cfg.isMobile()) {
             options.setExperimentalOption("mobileEmulation", mobileEmulation(cfg));

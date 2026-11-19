@@ -6,6 +6,7 @@ import ru.yandex.market.config.TestConfig;
 import ru.yandex.market.pages.CartPage;
 import ru.yandex.market.pages.MainPage;
 import ru.yandex.market.pages.SearchResultsPage;
+import ru.yandex.market.utils.Human;
 
 import static com.codeborne.selenide.Condition.interactable;
 import static com.codeborne.selenide.Condition.visible;
@@ -45,7 +46,7 @@ public class Header {
     public SearchResultsPage search(String query) {
         searchInput().shouldBe(interactable).click();
         SelenideElement input = searchInput();
-        input.setValue(query);
+        Human.type(input, query);
         if (mobile) {
             input.pressEnter();
         } else {

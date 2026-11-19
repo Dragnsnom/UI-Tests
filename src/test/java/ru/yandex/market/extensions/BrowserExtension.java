@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import ru.yandex.market.config.TestConfig;
 import ru.yandex.market.driver.DriverConfigurator;
+import ru.yandex.market.utils.Human;
 
 /**
  * Жизненный цикл браузера: настройка Selenide перед классом, отдельный браузер на каждый тест
@@ -37,5 +38,7 @@ public class BrowserExtension implements BeforeAllCallback, BeforeEachCallback, 
     @Override
     public void afterEach(ExtensionContext context) {
         Selenide.closeWebDriver();
+        // Пачка новых сессий подряд без пауз — ещё один признак бота
+        Human.pause(TestConfig.get().testDelay());
     }
 }

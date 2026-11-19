@@ -1,11 +1,33 @@
 package ru.yandex.market.extensions;
 
 import com.codeborne.selenide.WebDriverRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.yandex.market.config.TestConfig;
+import ru.yandex.market.utils.Waits;
 
 /** Распознаёт страницы защиты Яндекса (SmartCaptcha, 403), чтобы тест падал с понятной причиной. */
 public final class SiteGuard {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SiteGuard.class);
+
     private SiteGuard() {
+    }
+
+    /**
+     * С -PcaptchaWait=N и видимым браузером даёт решить капчу руками. После решения Яндекс сам
+     * возвращает на исходную страницу, а с -PuserDataDir cookie сохранится для следующих запусков.
+     */
+    private static void waitForManualSolve() {
+        TestConfig cfg = TestConfig.get();
+        if (cfg.captchaWait() <= 0 || cfg.headless() || cfg.remote().isPresent()) {
+            return;
+        }
+        LOG.warn("Показана капча — решите её в окне браузера, жду до {} с", cfg.captchaWait());
+        if (Waits.until(() -> !isBlocked(), cfg.captchaWait() * 1000)) {
+            LOG.info("Капча пройдена, продолжаю");
+            Waits.until(() -> "complete".equals(com.codeborne.selenide.Selenide.executeJavaScript("return document.readyState")), 10_000);
+        }
     }
 
     public static boolean isBlocked() {
@@ -27,6 +49,9 @@ public final class SiteGuard {
     }
 
     static void checkNotBlocked(Throwable cause) {
+        if (isBlocked() && cause == null) {
+            waitForManualSolve();
+        }
         if (isBlocked()) {
             throw new SiteBlockedException(
                     "Яндекс Маркет не пустил автотест: показана капча или 403 (" + WebDriverRunner.url() + "). "

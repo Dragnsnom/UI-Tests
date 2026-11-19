@@ -9,6 +9,7 @@ import ru.yandex.market.pages.MainPage;
 import ru.yandex.market.pages.SearchResultsPage;
 import ru.yandex.market.screenshot.VisualCheck;
 import ru.yandex.market.tests.BaseTest;
+import ru.yandex.market.utils.Human;
 
 @ScreenshotTest
 @DesktopOnly
@@ -27,7 +28,7 @@ class DesktopScreenshotTest extends BaseTest {
     @DisplayName("Строка поиска с введённым запросом")
     void searchRowWithQuery() {
         MainPage page = new MainPage().open();
-        page.header().searchInput().setValue("iphone 16");
+        Human.type(page.header().searchInput(), "iphone 16");
         VisualCheck.of("main-search-row-filled", page.header().searchRow())
                 // подсказки поиска открываются поверх и зависят от популярности запросов
                 .hide("[data-zone-name=suggestBlock]")

@@ -35,6 +35,13 @@ public final class TestConfig {
     private final double screenshotTolerance = Double.parseDouble(prop("screenshotTolerance", "0.5"));
     private final Path baselineDir = Path.of(prop("baselineDir", "src/test/screenshots"));
     private final Path screenshotOutputDir = Path.of(prop("screenshotOutputDir", "build/screenshots"));
+    private final boolean stealth = Boolean.parseBoolean(prop("stealth", "true"));
+    private final boolean humanize = Boolean.parseBoolean(prop("humanize", "true"));
+    private final DelayRange actionDelay = DelayRange.parse(prop("actionDelay", "300-900"));
+    private final DelayRange typingDelay = DelayRange.parse(prop("typingDelay", "70-200"));
+    private final DelayRange testDelay = DelayRange.parse(prop("testDelay", "2000-5000"));
+    private final String userDataDir = prop("userDataDir", "");
+    private final long captchaWait = Long.parseLong(prop("captchaWait", "120"));
 
     private TestConfig() {
     }
@@ -75,6 +82,20 @@ public final class TestConfig {
     public double screenshotTolerance() { return screenshotTolerance; }
     public Path baselineDir() { return baselineDir; }
     public Path screenshotOutputDir() { return screenshotOutputDir; }
+    /** Скрывать признаки автоматизации в Chromium (navigator.webdriver, флаг enable-automation). */
+    public boolean stealth() { return stealth; }
+    /** Паузы между действиями и посимвольный ввод, как у живого пользователя. */
+    public boolean humanize() { return humanize; }
+    /** Пауза перед кликом, вводом, переходом. */
+    public DelayRange actionDelay() { return actionDelay; }
+    /** Пауза между символами при вводе текста. */
+    public DelayRange typingDelay() { return typingDelay; }
+    /** Пауза между тестами (после закрытия браузера). */
+    public DelayRange testDelay() { return testDelay; }
+    /** Постоянный профиль браузера: cookies (в т.ч. пройденной капчи) переживают перезапуск. Пусто = чистый профиль. */
+    public Optional<Path> userDataDir() { return Optional.of(userDataDir).filter(s -> !s.isBlank()).map(s -> s.startsWith("~/") ? Path.of(System.getProperty("user.home"), s.substring(2)) : Path.of(s)).map(Path::toAbsolutePath); }
+    /** Сколько секунд ждать ручного решения капчи (только с видимым браузером). 0 = сразу падать. */
+    public long captchaWait() { return captchaWait; }
 
     /** Профиль окружения для раскладки эталонов: chrome/desktop, chrome/mobile-iphone-12-pro ... */
     public String profile() {
@@ -84,9 +105,10 @@ public final class TestConfig {
 
     @Override
     public String toString() {
-        return "browser=%s%s, mode=%s%s, headless=%s, remote=%s, baseUrl=%s".formatted(
+        return "browser=%s%s, mode=%s%s, headless=%s, remote=%s, baseUrl=%s, stealth=%s, humanize=%s (action %s, typing %s, test %s), profile=%s, captchaWait=%ss".formatted(
                 browser.selenideName(), browserVersion().map(v -> ":" + v).orElse(""),
                 mode.id(), isMobile() ? " (" + device.name() + ")" : " (" + resolution + ")",
-                headless, remote().orElse("-"), baseUrl);
+                headless, remote().orElse("-"), baseUrl, stealth, humanize, actionDelay, typingDelay, testDelay,
+                userDataDir().map(Path::toString).orElse("clean"), captchaWait);
     }
 }

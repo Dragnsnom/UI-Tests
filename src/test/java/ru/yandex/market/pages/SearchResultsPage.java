@@ -6,6 +6,7 @@ import com.codeborne.selenide.WebDriverRunner;
 import io.qameta.allure.Step;
 import ru.yandex.market.config.TestConfig;
 import ru.yandex.market.pages.components.ProductSnippet;
+import ru.yandex.market.utils.Human;
 import ru.yandex.market.utils.Waits;
 
 import java.net.URLEncoder;
@@ -75,7 +76,7 @@ public class SearchResultsPage extends BasePage<SearchResultsPage> {
     public SearchResultsPage setPriceFrom(int min) {
         SelenideElement input = priceFilter().$("[data-auto=filter-range-min] input").shouldBe(visible);
         input.click();
-        input.setValue(String.valueOf(min)).pressTab();
+        Human.type(input, String.valueOf(min)).pressTab();
         webdriver().shouldHave(urlContaining("pricefrom=" + min));
         waitResultsUpdated(() -> prices(10).stream().allMatch(p -> p >= min));
         return this;

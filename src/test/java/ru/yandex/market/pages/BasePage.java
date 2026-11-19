@@ -20,7 +20,17 @@ public abstract class BasePage<T extends BasePage<T>> {
     @SuppressWarnings("unchecked")
     public T waitLoaded() {
         SiteGuard.checkNotBlocked();
-        waitForPageElements();
+        try {
+            waitForPageElements();
+        } catch (AssertionError | RuntimeException e) {
+            // Капча могла появиться уже после проверки — например, редирект после клика по поиску.
+            // Тогда даём решить её руками и ждём страницу ещё раз, иначе пробрасываем исходную ошибку
+            if (!SiteGuard.isBlocked()) {
+                throw e;
+            }
+            SiteGuard.checkNotBlocked();
+            waitForPageElements();
+        }
         Popups.dismiss();
         return (T) this;
     }

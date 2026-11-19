@@ -49,6 +49,7 @@ val uiProperties = listOf(
     "browser", "browserVersion", "browserArgs", "mode", "device", "userAgent", "resolution", "headless",
     "remote", "enableVnc", "enableVideo", "baseUrl", "timeout", "pageLoadTimeout",
     "updateBaseline", "screenshotTolerance",
+    "stealth", "humanize", "actionDelay", "typingDelay", "testDelay", "userDataDir", "captchaWait",
 )
 
 fun prop(name: String): String? =
