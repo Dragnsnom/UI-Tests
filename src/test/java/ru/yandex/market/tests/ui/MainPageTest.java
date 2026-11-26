@@ -9,6 +9,7 @@ import ru.yandex.market.annotations.DesktopOnly;
 import ru.yandex.market.annotations.UiTest;
 import ru.yandex.market.pages.MainPage;
 import ru.yandex.market.pages.SearchResultsPage;
+import ru.yandex.market.pages.components.Popups;
 import ru.yandex.market.tests.BaseTest;
 
 import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
@@ -41,5 +42,14 @@ class MainPageTest extends BaseTest {
                 .header().clickLogo();
 
         assertThat(WebDriverRunner.url()).doesNotContain("/search");
+    }
+
+    @Test
+    @DesktopOnly
+    @DisplayName("При клике на корзину гостю предлагается войти")
+    void guestCartShowsLogin() {
+        new MainPage().open().header().clickCart();
+
+        Popups.signInTitle().shouldBe(visible);
     }
 }
