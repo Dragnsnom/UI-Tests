@@ -44,6 +44,11 @@ public class Header {
 
     @Step("Найти «{query}» через строку поиска")
     public SearchResultsPage search(String query) {
+        submitSearch(query);
+        return new SearchResultsPage().waitLoaded();
+    }
+
+    public void submitSearch(String query) {
         searchInput().shouldBe(interactable).click();
         SelenideElement input = searchInput();
         Human.type(input, query);
@@ -52,7 +57,6 @@ public class Header {
         } else {
             $("button[data-auto=search-button]").click();
         }
-        return new SearchResultsPage().waitLoaded();
     }
 
     @Step("Перейти на главную по логотипу")
@@ -63,7 +67,11 @@ public class Header {
 
     @Step("Открыть корзину")
     public CartPage openCart() {
-        cart().$("a").click();
+        clickCart();
         return new CartPage().waitLoaded();
+    }
+
+    public void clickCart() {
+        cart().$("a").click();
     }
 }

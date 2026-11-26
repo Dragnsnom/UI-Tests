@@ -4,6 +4,7 @@ import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 
 import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$$;
 
 /** Закрывает всплывающие окна, которые мешают тестам: уточнение адреса, промо приложения, авторизация. */
@@ -24,6 +25,10 @@ public final class Popups {
             "[data-auto=icon-cross]");
 
     private Popups() {
+    }
+
+    public static SelenideElement signInTitle() {
+        return $$(byText("Войдите в аккаунт")).findBy(visible);
     }
 
     /** Без ожиданий: закрывает только то, что видно прямо сейчас. */
