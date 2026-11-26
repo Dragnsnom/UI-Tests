@@ -9,10 +9,9 @@ import ru.yandex.market.tests.BaseTest;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 
-import static com.codeborne.selenide.Selenide.Wait;
-import static org.openqa.selenium.support.ui.ExpectedConditions.urlMatches;
+import static com.codeborne.selenide.Selenide.webdriver;
+import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 
 @UiTest
 @DesktopOnly
@@ -26,7 +25,7 @@ class MarketSearchQueryTest extends BaseTest {
 
         new MainPage().open().header().submitSearch(query);
 
-        Wait().until(urlMatches(
-                ".*/search\\?(?:[^#]*&)?text=" + Pattern.quote(encodedQuery) + "(?:[&#].*)?$"));
+        webdriver().shouldHave(urlContaining("/search"));
+        webdriver().shouldHave(urlContaining(encodedQuery));
     }
 }

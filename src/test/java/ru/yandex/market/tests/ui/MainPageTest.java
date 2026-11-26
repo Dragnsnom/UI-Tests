@@ -47,7 +47,7 @@ class MainPageTest extends BaseTest {
     @Test
     @DesktopOnly
     @DisplayName("При клике на корзину гостю предлагается войти")
-    void guestSeesSignInWhenClickingCart() {
+    void guestCartShowsLogin() {
         new MainPage().open().header().clickCart();
 
         Popups.signInTitle().shouldBe(visible);
